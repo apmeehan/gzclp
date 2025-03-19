@@ -4,13 +4,14 @@ GZCLP is the name for [Cody LeFever’s linear-progression strength training pro
 
 It tells you exactly what, when and how much to lift, tracks your progress, and tells you what you'll be lifting next time.
 
-[<img alt="Screenshot 1" src="https://github.com/apmeehan/gzclp/blob/master/screenshots/1.png" width="270">](#)
-[<img alt="Screenshot 2" src="https://github.com/apmeehan/gzclp/blob/master/screenshots/2.png" width="270">](#)
-[<img alt="Screenshot 3" src="https://github.com/apmeehan/gzclp/blob/master/screenshots/3.png" width="270">](#)
+[**Web-based demo**](https://gzclp.expo.app) (the routing in this is a little buggy)
 
-If you have any questions or queries, feel free to [contact me](mailto:apetermeehan+apps@gmail.com).
+<p float="left">
+  <img src="screenshots/1.png" width="270" />
+  <img src="screenshots/2.png" width="270" /> 
+  <img src="screenshots/3.png" width="270" />
+</p>
 
-[Privacy policy](https://github.com/apmeehan/gzclp/blob/master/PRIVACY.md)
 
 ### Development Notes
 

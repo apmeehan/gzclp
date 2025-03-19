@@ -33,6 +33,19 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "expo": {
+      "experiments": {
+        "baseUrl": "/gzclp"
+      }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "81279550-1f3a-11e9-9364-0d61e6784d7e"
+      }
     }
   }
 }
