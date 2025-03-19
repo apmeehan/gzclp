@@ -3,30 +3,36 @@
     "name": "GZCLP",
     "description": "An app that makes following the GZCLP beginner strength-training program easy.",
     "slug": "gzclp",
-    "privacy": "unlisted",
-    "sdkVersion": "33.0.0",
-    "platforms": ["ios", "android"],
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "gzclp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
-      "supportsTablet": true,
-			"bundleIdentifier": "com.petermeehan.gzclp"
-		},
-		"android": {
-			"package": "com.petermeehan.gzclp",
-      "permissions": [],
-		}
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

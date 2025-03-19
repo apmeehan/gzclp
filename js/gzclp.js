@@ -1,4 +1,4 @@
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const gzclp = {};
 
@@ -307,11 +307,20 @@ gzclp.saveProgramState = async function() {
  * Fetch stringified program state object and reparse it as an object
  */
 gzclp.fetchProgramState = async function() {
-  var programStateString = await AsyncStorage.getItem(
-    'programState',
-    () => console.log("Program state loaded")
-  );
-  return JSON.parse(programStateString)
+  try {
+    var programStateString = await AsyncStorage.getItem(
+      'programState',
+      () => console.log("Program state loaded")
+    );
+    
+    if (programStateString) {
+      return JSON.parse(programStateString);
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching program state:", error);
+    return null;
+  }
 }
 /*
  * Clear all saved data
@@ -459,3 +468,136 @@ gzclp.getCopyOfObject = function(obj) {
 gzclp.roundDownToNearestIncrement = function(number, increment) {
   return Math.floor(number * (1/increment)) / (1/increment);
 }
+
+/*
+ * Returns the next workout session object with exercises, weights, and rep schemes
+ */
+gzclp.getNextSession = function() {
+  const sessionID = gzclp.getCurrentSessionID();
+  const sessionName = gzclp.getSessionName(sessionID);
+  const sessionLifts = gzclp.getSessionLifts(sessionID);
+  
+  const exercises = [];
+  
+  // Sort lifts by tier
+  const sortedLiftIDs = gzclp.sortLiftIDsByTier([...sessionLifts]);
+  
+  // Build exercise list
+  sortedLiftIDs.forEach(liftID => {
+    const tier = gzclp.getLiftTier(liftID);
+    const name = gzclp.getLiftName(liftID);
+    const weight = gzclp.getNextAttemptWeight(liftID);
+    const repSchemeIndex = gzclp.getNextAttemptRepSchemeIndex(liftID);
+    const sets = gzclp.getNumberOfSets(tier, repSchemeIndex);
+    const reps = gzclp.getDisplayedRepsPerSet(tier, repSchemeIndex);
+    
+    // Check if the last set is AMRAP
+    const amrap = reps.toString().includes('+');
+    
+    exercises.push({
+      id: liftID,
+      tier,
+      name,
+      weight,
+      sets,
+      reps: parseInt(reps, 10),
+      amrap,
+      repSchemeIndex
+    });
+  });
+  
+  return {
+    id: sessionID,
+    name: sessionName,
+    day: sessionID + 1, // 1-based for display
+    exercises
+  };
+};
+
+/*
+ * Records the result of a set during a workout
+ */
+gzclp.recordSetResult = function(session, exerciseIndex, setIndex, success) {
+  // Record the set result in memory (we'll save it when the session is completed)
+  const exercise = session.exercises[exerciseIndex];
+  
+  // We only need to track if the overall exercise was successful
+  exercise.success = success;
+  
+  return true;
+};
+
+/*
+ * Completes a workout session and records the results
+ */
+gzclp.completeSession = function(session) {
+  // Process each exercise result
+  session.exercises.forEach(exercise => {
+    if (exercise.success) {
+      gzclp.handleSuccessfulLift(exercise.id);
+    } else {
+      gzclp.handleFailedLift(exercise.id);
+    }
+  });
+  
+  // Save the session result
+  const sessionResult = {};
+  session.exercises.forEach(exercise => {
+    sessionResult[exercise.id] = exercise.success ? 1 : 0;
+  });
+  
+  gzclp.addCompletedSession(sessionResult);
+  
+  // Move to the next session
+  gzclp.incrementSessionCounter();
+  
+  return true;
+};
+
+/*
+ * Returns default weights for starting the program
+ */
+gzclp.getDefaultWeights = function() {
+  return {
+    squat: 20,
+    bench: 20,
+    deadlift: 20,
+    overheadPress: 20,
+    row: 20
+  };
+};
+
+/*
+ * Sets the starting weights for the lifts
+ */
+gzclp.setStartingWeights = function(weights) {
+  // Find lift IDs for each main exercise
+  const lifts = gzclp.getAllLifts();
+  
+  Object.keys(lifts).forEach(liftID => {
+    const name = gzclp.getLiftName(liftID).toLowerCase();
+    
+    if (name.includes('squat')) {
+      gzclp.setNextAttemptWeight(liftID, weights.squat);
+    } else if (name.includes('bench')) {
+      gzclp.setNextAttemptWeight(liftID, weights.bench);
+    } else if (name.includes('deadlift')) {
+      gzclp.setNextAttemptWeight(liftID, weights.deadlift);
+    } else if (name.includes('overhead') || name.includes('press')) {
+      gzclp.setNextAttemptWeight(liftID, weights.overheadPress);
+    } else if (name.includes('row')) {
+      gzclp.setNextAttemptWeight(liftID, weights.row);
+    }
+  });
+  
+  return true;
+};
+
+/*
+ * Marks the setup as complete
+ */
+gzclp.completeSetup = function() {
+  gzclp.state.setupComplete = true;
+  gzclp.setIsFirstTime(false);
+  return true;
+};
